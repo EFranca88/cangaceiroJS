@@ -26,9 +26,7 @@ document.querySelector('.form').addEventListener('submit', function(event) {
         //adiciona a td na tr
         tr.appendChild(td)
     })
-})
-
-var tbody = document.querySelector('table tbody')
+    var tbody = document.querySelector('table tbody')
 
 document.querySelector('.form').addEventListener('submit', function(event) {
     var tr = document.createElement('tr')
@@ -40,6 +38,20 @@ document.querySelector('.form').addEventListener('submit', function(event) {
 })
 
 // nova td que armazenará o volume da negociação
+var tdVolume = document.createElement('td')
+
+// As posições 1 e 2 do array armazenam os campos de quantidade e valor, respectivamente
+tdVolume.textContent = campos[1].value * campos[2].value
+
+// Adicinando a td que faltava a tr
+tr.appendChild(tdVolume)
+
+
+
+
+
+
+
 
 
 
