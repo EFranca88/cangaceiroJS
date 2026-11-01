@@ -48,21 +48,6 @@ document.querySelector('.form').addEventListener('submit', function(event) {
     // limpa o campo da data
     campos[0].focus()
 })
+// Foi proposto o uso do modelo MVC (Model-View-Controller) no capitulo 2
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* pagina 34 ou 8 */
+// O papel de um modelo - Um modelo é uma abstração de algo do mundo real.
