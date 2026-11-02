@@ -1,19 +1,29 @@
 'use strict';
 
-// Minimal `--flag value` parser for the arguments passed by the native layer.
-function parseArgs(argv) {
-  const out = { port: 3000, host: '127.0.0.1', token: '', cwd: '' };
-  for (let i = 0; i < argv.length; i += 2) {
-    const key = argv[i];
-    const value = argv[i + 1];
-    switch (key) {
-      case '--port': out.port = parseInt(value, 10) || out.port; break;
-      case '--host': out.host = value || out.host; break;
-      case '--token': out.token = value || ''; break;
-      case '--cwd': out.cwd = value || ''; break;
-    }
-  }
-  return out;
+// Application routes. This is where you build your actual API.
+// `ctx` = { req, res, url, body, sendJson }.
+
+function register(router) {
+  // Unauthenticated readiness probe — used by the native layer to detect
+  // when the listener is up. Keep it cheap and side-effect free.
+  router.get('/health', (ctx) => {
+    ctx.sendJson(ctx.res, 200, { status: 'ok', uptime: process.uptime() });
+  });
+
+  // Example: runtime/environment info.
+  router.get('/api/info', (ctx) => {
+    ctx.sendJson(ctx.res, 200, {
+      node: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      pid: process.pid,
+    });
+  });
+
+  // Example: echo a posted JSON body back to the caller.
+  router.post('/api/echo', (ctx) => {
+    ctx.sendJson(ctx.res, 200, { received: ctx.body });
+  });
 }
 
-module.exports = { parseArgs };
+module.exports = { register };
