@@ -1,0 +1,125 @@
+<!-- public/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Local Node Server</title>
+  <style>
+    :root {
+      --bg: #11151c; --card: #1b212b; --line: #2a323e;
+      --fg: #e6edf3; --muted: #8b98a9; --accent: #43a047;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--fg);
+      font-family: system-ui, -apple-system, Roboto, sans-serif;
+      padding: env(safe-area-inset-top) 16px 24px;
+    }
+    header { padding: 20px 0 8px; }
+    h1 { font-size: 20px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 14px; padding: 16px; margin-top: 16px;
+    }
+    .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+    pre {
+      font-family: var(--mono); font-size: 13px; background: #0d1117;
+      border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+      overflow-x: auto; margin: 8px 0 0; white-space: pre-wrap; word-break: break-word;
+    }
+    button {
+      appearance: none; border: 0; border-radius: 10px; padding: 12px 16px;
+      background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
+      cursor: pointer; margin-top: 12px; width: 100%;
+    }
+    input {
+      width: 100%; padding: 10px 12px; margin-top: 8px; border-radius: 10px;
+      border: 1px solid var(--line); background: #0d1117; color: var(--fg);
+      font-family: var(--mono); font-size: 13px;
+    }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Local Node Server</h1>
+    <div class="sub row"><span class="dot"></span> <span id="conn">connected via WebView</span></div>
+  </header>
+
+  <!-- Shown only when opened outside the app (no native bridge): paste token -->
+  <div class="card" id="tokenCard" style="display:none">
+    <div class="label">Auth token</div>
+    <input id="tokenInput" placeholder="Paste the token shown in the app" autocomplete="off" />
+    <div class="hint">Required when viewing this page in a regular browser.</div>
+  </div>
+
+  <div class="card">
+    <div class="label">Runtime info</div>
+    <pre id="info">tap “Load info”…</pre>
+    <button id="infoBtn">Load info</button>
+  </div>
+
+  <div class="card">
+    <div class="label">Echo test (POST /api/echo)</div>
+    <input id="echoInput" value='{"hello":"world"}' />
+    <pre id="echoOut">—</pre>
+    <button id="echoBtn">Send</button>
+  </div>
+
+  <script>
+    // The native WebView injects `AndroidBridge`; in a plain browser it's absent.
+    const bridge = window.AndroidBridge;
+    const inApp = !!bridge;
+    const baseUrl = inApp ? bridge.getBaseUrl() : (location.origin);
+
+    if (!inApp) {
+      document.getElementById('tokenCard').style.display = 'block';
+      document.getElementById('conn').textContent = 'opened in browser';
+    }
+
+    function token() {
+      return inApp ? bridge.getToken() : document.getElementById('tokenInput').value.trim();
+    }
+
+    async function api(method, path, body) {
+      const res = await fetch(baseUrl + path, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': token(),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const text = await res.text();
+      try { return { status: res.status, data: JSON.parse(text) }; }
+      catch { return { status: res.status, data: text }; }
+    }
+
+    document.getElementById('infoBtn').onclick = async () => {
+      const out = document.getElementById('info');
+      out.textContent = 'loading…';
+      try {
+        const r = await api('GET', '/api/info');
+        out.textContent = JSON.stringify(r.data, null, 2);
+      } catch (e) { out.textContent = 'error: ' + e.message; }
+    };
+
+    document.getElementById('echoBtn').onclick = async () => {
+      const out = document.getElementById('echoOut');
+      out.textContent = 'sending…';
+      let payload;
+      try { payload = JSON.parse(document.getElementById('echoInput').value); }
+      catch { out.textContent = 'invalid JSON'; return; }
+      try {
+        const r = await api('POST', '/api/echo', payload);
+        out.textContent = JSON.stringify(r.data, null, 2);
+      } catch (e) { out.textContent = 'error: ' + e.message; }
+    };
+  </script>
+</body>
+</html>
