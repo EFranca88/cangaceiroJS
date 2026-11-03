@@ -65,10 +65,11 @@
     <script>
 
         var n1 = new Negociacao(new Date(), 5, 700)
-        var volume = n1.quantidade * n1.valor
-        console.log(n1)
-        console.log(volume)
-
+        n1.quantidade = 1000
+        console.log(n1.quantidade)
+        console.log(n1.data)
+        console.log(n1.valor)
+        console.log(n1.volume)
 
     </script>
 </body>

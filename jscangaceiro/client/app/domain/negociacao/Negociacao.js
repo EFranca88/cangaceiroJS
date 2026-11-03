@@ -4,9 +4,30 @@
 
 class Negociacao{
     constructor(data, quantidade, valor) {
-    // cada valor recebido será atribuido Às propriedades da classe    
-        this.data = data
-        this.quantidade = quantidade
-        this.valor = valor
+    // Cada valor recebido será atribuído às propriedades da classe    
+        this._data = data
+        this._quantidade = quantidade
+        this._valor = valor
+    }
+
+    // Funções que definem um comportamento de uma classe são chamadas de métodos para alinhar o vocabulário com o paradigma da Orientação a Objetos.
+    get volume() {
+        return this._quantidade * this._valor
+    }
+
+    // Convencionarmos para que toda propriedade de uma classe seja prefixada com um underline ( _ ), ou seja,  não deve ser acessada fora dos métodos da própria classe. 
+    // Esta será uma convenção que informará ao programador que as propriedades que contenham _ (underline) só poderão ser acessadas pelos próprios métodos da classe.
+    // Obs. Conveção necessaria por não existir um modo apenas leitura na linguagem JavaScript
+    get data() {
+        return this._data
+    }
+
+    // Podemos utilizar a sintaxe get para acessarmos os métodos dentro da classe.
+    get quantidade() {
+        return this._quantidade
+    }
+
+    get valor() {
+        return this._valor
     }
 }
